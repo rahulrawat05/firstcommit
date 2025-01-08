@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electricity Bill Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="bg-gradient-to-br from-blue-100 via-white to-blue-50 min-h-screen flex items-center justify-center"
+  >
+    <div class="bg-white shadow-xl rounded-lg p-8 w-full max-w-lg">
+      <h1 class="text-3xl font-extrabold mb-6 text-center text-blue-700">
+        ⚡ Electricity Bill Calculator ⚡
+      </h1>
+
+      <!-- Mama Unit Input -->
+      <div class="mb-5">
+        <label for="mamaUnit" class="block text-gray-600 font-semibold mb-1"
+          >Enter Mama's Unit:</label
+        >
+        <input
+          id="mamaUnit"
+          type="number"
+          class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-300"
+          placeholder="Mama's unit"
+        />
+      </div>
+
+      <!-- Jaggi Unit Input -->
+      <div class="mb-5">
+        <label for="jaggiUnit" class="block text-gray-600 font-semibold mb-1"
+          >Enter Jaggi's Unit:</label
+        >
+        <input
+          id="jaggiUnit"
+          type="number"
+          class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-300"
+          placeholder="Jaggi's unit"
+        />
+      </div>
+
+      <!-- Total Unit Charge Input -->
+      <div class="mb-5">
+        <label
+          for="totalUnitCharge"
+          class="block text-gray-600 font-semibold mb-1"
+          >Enter Given Total Unit Charges:</label
+        >
+        <input
+          id="totalUnitCharge"
+          type="number"
+          class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-300"
+          placeholder="Total unit charges"
+        />
+      </div>
+
+      <!-- Total Bill Input -->
+      <div class="mb-5">
+        <label for="totalBill" class="block text-gray-600 font-semibold mb-1"
+          >Enter Total Bill:</label
+        >
+        <input
+          id="totalBill"
+          type="number"
+          class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-300"
+          placeholder="Total bill"
+        />
+      </div>
+
+      <button
+        id="calculate"
+        class="w-full flex items-center justify-center gap-2 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 10V3L4 14h7v7l9-11h-7z"
+          />
+        </svg>
+        Calculate
+      </button>
+
+      <!-- Results -->
+      <div id="results" class="mt-6 hidden">
+        <p class="text-gray-700 font-semibold text-lg">
+          Mama's Bill:
+          <span id="mamaBill" class="font-bold text-blue-600"></span>
+        </p>
+        <p class="text-gray-700 font-semibold text-lg">
+          Jaggi's Bill:
+          <span id="jaggiBill" class="font-bold text-blue-600"></span>
+        </p>
+        <p class="text-gray-700 font-semibold text-lg">
+          Total Bill:
+          <span id="totalBillResult" class="font-bold text-blue-600"></span>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("calculate").addEventListener("click", () => {
+        const mamaUnit = parseFloat(document.getElementById("mamaUnit").value);
+        const jaggiUnit = parseFloat(
+          document.getElementById("jaggiUnit").value
+        );
+        const givenTotalCharge = parseFloat(
+          document.getElementById("totalUnitCharge").value
+        );
+        const totalBill = parseFloat(
+          document.getElementById("totalBill").value
+        );
+
+        if (
+          isNaN(mamaUnit) ||
+          isNaN(jaggiUnit) ||
+          isNaN(givenTotalCharge) ||
+          isNaN(totalBill)
+        ) {
+          alert("Please fill all fields with valid numbers.");
+          return;
+        }
+
+        const totalUnitUsed = mamaUnit + jaggiUnit;
+
+        // Calculate unit charges
+        const calculateCharge = (unit) => {
+          if (unit <= 100) {
+            return unit * 3.4;
+          } else if (unit <= 200) {
+            return 100 * 3.4 + (unit - 100) * 4.9;
+          } else if (unit <= 400) {
+            return 100 * 3.4 + 100 * 4.9 + (unit - 200) * 6.7;
+          } else {
+            return 100 * 3.4 + 100 * 4.9 + 200 * 6.7 + (unit - 400) * 7.35;
+          }
+        };
+
+        let totalUnitCharge = calculateCharge(totalUnitUsed);
+        let mamaCharge = calculateCharge(mamaUnit);
+        let jaggiCharge = calculateCharge(jaggiUnit);
+
+        // Adjust charges if given total charge differs
+        if (totalUnitCharge < givenTotalCharge) {
+          const extraCharge = (givenTotalCharge - totalUnitCharge) / 2;
+          mamaCharge += extraCharge;
+          jaggiCharge += extraCharge;
+        } else if (totalUnitCharge > givenTotalCharge) {
+          const extraCharge = (totalUnitCharge - givenTotalCharge) / 2;
+          mamaCharge -= extraCharge;
+          jaggiCharge -= extraCharge;
+        }
+
+        // Final adjustment for total bill
+        const totalCalculatedBill = mamaCharge + jaggiCharge;
+        if (totalBill !== totalCalculatedBill) {
+          const adjustment = (totalBill - totalCalculatedBill) / 2;
+          mamaCharge += adjustment;
+          jaggiCharge += adjustment;
+        }
+
+        // Display results
+        document.getElementById("mamaBill").textContent = mamaCharge.toFixed(2);
+        document.getElementById("jaggiBill").textContent =
+          jaggiCharge.toFixed(2);
+        document.getElementById("totalBillResult").textContent = (
+          mamaCharge + jaggiCharge
+        ).toFixed(2);
+        document.getElementById("results").classList.remove("hidden");
+      });
+    </script>
+  </body>
+</html>
